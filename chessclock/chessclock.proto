@@ -1,0 +1,82 @@
+syntax = "proto3";
+package chessclock;
+
+service ChessClock {
+  rpc Start(StartRequest) returns (StartResponse) {}
+  rpc Stop(StopRequest) returns (StopResponse) {}
+  rpc Schedule(ScheduleRequest) returns (ScheduleResponse) {}
+  rpc Tally(TallyRequest) returns (TallyResponse) {}
+  rpc ListTimeSheets(ListTimeSheetsRequest) returns (ListTimeSheetsResponse) {}
+  rpc ListTags(ListTagsRequest) returns (ListTagsResponse) {}
+  rpc Version(VersionRequest) returns (VersionResponse) {}
+}
+
+message StartRequest {
+  int64 timestamp = 1;      //REQUIRED:   Timestamp is the start time of the task
+  string tag = 2;           //REQUIRED:   Tag the task for later recall
+  string description = 3;   //OPTIOINAL:  Description of the task
+}
+
+//Empty response but useful if we need a resposne later.
+message StartResponse {}
+
+message StopRequest {
+  enum Reason {
+    Break = 0;              //Mark the reason as a general break
+    Lunch = 1;              //Mark the reason as a lunch break
+    EndOfDay = 2;           //Mark the reason as it is the end of the day
+  }
+  int64 timestamp = 1;      //REQUIRED:   Time of the stop event
+  Reason reason = 2;        //OPTIONAL:   Reason for stopping the previous task.
+}
+
+//Empty response but useful if we need a resposne later.
+message StopResponse {}
+
+message ScheduleRequest {
+  int64 date = 1;           //REQUIRED:   Which day to return data for
+}
+
+message ScheduleResponse {
+  message Task {
+    int64 timestamp = 1;    //Timestamp the task was started
+    string tag = 2;         //Tag of the task
+    string description = 3; //Description of the task
+  }
+  repeated Task tasks = 1;  //List of tasks not consolidated.
+}
+
+message TallyRequest {
+  int64 date = 1;           //REQUIRED:   Which day to return data for
+}
+
+message TallyResponse {
+  message Task {
+    int64 timespan= 1;      //Timespane the task took
+    string tag = 2;         //Tag of the task
+    string description = 3; //Description of the task
+  }
+  repeated Task tasks = 1;  //List of tasks after consolidation.
+}
+
+//Empty request but useful if we need parameters later.
+message ListTimeSheetsRequest {}
+
+message ListTimeSheetsResponse {
+  repeated int64 dates = 1;  //List of dates the timesheet is for
+}
+
+message ListTagsRequest {
+  int64 date = 1;           //REQUIRED:   Which day query for a list of tags
+}
+
+message ListTagsResponse {
+  repeated string tags = 1; //List of tags for the date requested
+}
+
+//Empty request but useful if we need parameters later.
+message VersionRequest {}
+
+message VersionResponse {
+  string version = 1;     //Version of the Daemon
+}
